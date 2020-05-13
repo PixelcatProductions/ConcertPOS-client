@@ -12,6 +12,21 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 The page will reload if you make edits.<br />
 You will also see any lint errors in the console.
 
+### `npm run package-win`
+
+Builds the app for windows from the `build` folder
+Your app is ready to be deployed!
+
+### `npm run package-mac`
+
+Builds the app for mac from the `build` folder
+Your app is ready to be deployed!
+
+### `npm run create-installer-win`
+
+Builds the app for mac from the `release-builds` folder
+Your app is ready to be installed!
+
 ### `npm test`
 
 Launches the test runner in the interactive watch mode.<br />
