@@ -1,0 +1,54 @@
+{
+  "name": "concertpos",
+  "productName": "ConcertPOS",
+  "version": "1.0.1",
+  "private": true,
+  "description": "Festival management made easy",
+  "author": "Pixelcat Productions <support@pixelcatproductions.net>",
+  "main": "electron.js",
+  "dependencies": {
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.5.0",
+    "@testing-library/user-event": "^7.2.1",
+    "bootstrap": "^4.4.1",
+    "html-react-parser": "^0.10.3",
+    "noty": "^3.2.0-beta",
+    "react": "^16.13.1",
+    "react-bootstrap": "^1.0.0",
+    "react-dom": "^16.13.1",
+    "react-scripts": "3.4.1",
+    "react-websocket": "^2.1.0",
+    "reactide-config": "^1.0.2",
+    "uuid": "^8.0.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "compile": "electron electron.js",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "package-mac": "electron-packager . --overwrite --asar --platform=darwin --arch=x64 --icon=public/favicon.ico --prune=true --out=release-builds",
+    "package-win": "electron-packager . --overwrite --asar --platform=win32 --arch=ia32 --icon=public/favicon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"ConcertPOS\"",
+    "package-linux": "electron-packager . --overwrite --asar --platform=linux --arch=x64 --icon=public/ms-icon-310x310.png --prune=true --out=release-builds",
+    "create-installer-win": "node installers/windows/createinstaller.js"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "electron-winstaller": "^4.0.0",
+    "electron": "^8.2.5"
+  }
+}
