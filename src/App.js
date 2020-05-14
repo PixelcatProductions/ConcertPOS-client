@@ -218,15 +218,16 @@ class App extends React.Component {
         }).show();
       }
 
-
-      if (WSData.result.event === "bc_updatepos") {
+    }
+    
+	if(WSData.type === "broadcast"){
+	  if (WSData.result.message === "updatepos") {
         this.setState({
           RefreshButtonText: "Kasse updaten (Update ausstehend!)",
           RefreshButtonColor: "btn-danger btn-block",
         });
       }
-
-    }
+	}
 
     if (WSData.type === "error") {
       if (WSData.result.error === "missing_parameter_api") {
