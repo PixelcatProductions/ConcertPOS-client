@@ -73,6 +73,14 @@ class License extends React.Component {
                             <button className="btn btn-success w-100" onClick={this.props.refreshLicense}>Aktualisieren</button>
                         </div>
 
+                        <hr />
+                        <div className="btn-group d-flex">
+                            <a role="button" className="btn btn-success w-100 text-white" rel="noopener noreferrer" target="_blank" href={process.env.DOCSURL}>API Docs</a>
+                            <a role="button" className="btn btn-danger w-100 text-white" rel="noopener noreferrer" target="_blank" href={process.env.DOCSURLGIT}>Report API issue/Feature request</a>
+                            <a role="button" className="btn btn-primary w-100 text-white" rel="noopener noreferrer" target="_blank" href="https://pxlct.com/support">Contact support</a>
+                        </div>
+
+
                     </div>
                 </div>
             </div>
