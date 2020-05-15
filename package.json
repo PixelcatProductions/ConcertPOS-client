@@ -24,13 +24,19 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "distribute": "npm run build && npm run package-all",
     "compile": "electron electron.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "package-all": "npm run package-win && npm run package-linux && npm run package-linux-ia32 && npm run package-linux-armv7l && npm run package-linux-arm64 && npm run package-mac",
     "package-mac": "electron-packager . --overwrite --asar --platform=darwin --arch=x64 --icon=public/favicon.ico --prune=true --out=release-builds",
-    "package-win": "electron-packager . --overwrite --asar --platform=win32 --arch=ia32 --icon=public/favicon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"ConcertPOS\"",
+    "package-win": "electron-packager . --overwrite --asar --platform=win32 --arch=x64 --icon=public/favicon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"ConcertPOS\"",
     "package-linux": "electron-packager . --overwrite --asar --platform=linux --arch=x64 --icon=public/ms-icon-310x310.png --prune=true --out=release-builds",
-    "create-installer-win": "node installers/windows/createinstaller.js"
+    "package-linux-ia32": "electron-packager . --overwrite --asar --platform=linux --arch=ia32 --icon=public/ms-icon-310x310.png --prune=true --out=release-builds",
+    "package-linux-armv7l": "electron-packager . --overwrite --asar --platform=linux --arch=armv7l --icon=public/ms-icon-310x310.png --prune=true --out=release-builds",
+    "package-linux-arm64": "electron-packager . --overwrite --asar --platform=linux --arch=arm64 --icon=public/ms-icon-310x310.png --prune=true --out=release-builds",
+    "create-installer-win": "node installers/windows/createinstaller.js",
+    "create-installer-deb": "electron-installer-debian --src release-builds/ConcertPOS-linux-x64/ --dest release-builds/ --arch amd64"
   },
   "eslintConfig": {
     "extends": "react-app"

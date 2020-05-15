@@ -22,10 +22,15 @@ class App extends React.Component {
 
     let randomshard = Shards[Math.floor(Math.random() * Shards.length)];
 
+    if(process.env.NODE_ENV === "development"){
+      randomshard = process.env.REACT_APP_DEVSHARD;
+    }
+
     this.state = {
       WebSocketURI: (process.env.REACT_APP_AUTHSERVER).replace("{shard}", randomshard) + localStorage.getItem("instance_slug"),
       ConfigLoaded: false,
       Shard: randomshard,
+      isDev: (process.env.NODE_ENV === "development"),
       page: "selectworkplace",
       previousPage: null,
       previousWorkspace: {},
