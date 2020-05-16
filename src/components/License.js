@@ -43,6 +43,7 @@ class License extends React.Component {
             <div className="container">
                 <div className="card">
                     <div className="card-body">
+                        {this.props.statusAlertAO}
                         <div className="card-title">
                             <h4>Lizenz Informationen</h4>
                         </div>
@@ -70,13 +71,13 @@ class License extends React.Component {
                         <h5>Remote Ticket Limit: {this.props.Config.ticket_limit}</h5>
                         <div className="btn-group d-flex">
                             {Button}
-                            <button className="btn btn-success w-100" onClick={this.props.refreshLicense}>Aktualisieren</button>
+                            <button className="btn btn-success w-100" onClick={this.props.refreshAll}>Aktualisieren</button>
                         </div>
 
                         <hr />
                         <div className="btn-group d-flex">
-                            <a role="button" className="btn btn-success w-100 text-white" rel="noopener noreferrer" target="_blank" href={process.env.DOCSURL}>API Docs</a>
-                            <a role="button" className="btn btn-danger w-100 text-white" rel="noopener noreferrer" target="_blank" href={process.env.DOCSURLGIT}>Report API issue/Feature request</a>
+                            <a role="button" className="btn btn-success w-100 text-white" rel="noopener noreferrer" target="_blank" href={process.env.REACT_APP_DOCSURL}>API Docs</a>
+                            <a role="button" className="btn btn-danger w-100 text-white" rel="noopener noreferrer" target="_blank" href={process.env.REACT_APP_DOCSURLGIT}>Report API issue/Feature request</a>
                             <a role="button" className="btn btn-primary w-100 text-white" rel="noopener noreferrer" target="_blank" href="https://pxlct.com/support">Contact support</a>
                         </div>
 

@@ -10,6 +10,7 @@ import Setup from './components/Setup';
 import Card from './components/Card';
 import License from './components/License';
 import * as uuid from 'uuid';
+import { translate, Trans } from 'react-i18next';
 
 class App extends React.Component {
 
@@ -22,12 +23,21 @@ class App extends React.Component {
 
     let randomshard = Shards[Math.floor(Math.random() * Shards.length)];
 
-    if(process.env.NODE_ENV === "development"){
+    if (process.env.NODE_ENV === "development") {
       randomshard = process.env.REACT_APP_DEVSHARD;
     }
 
+
+    let wsuri = (process.env.REACT_APP_AUTHSERVER).replace("{shard}", randomshard) + localStorage.getItem("instance_slug");
+    /*if (process.env.NODE_ENV === "development") {
+      wsuri = "ws://localhost:6001/" + localStorage.getItem("instance_slug");
+    }*/
+
+    console.log(wsuri);
+
+
     this.state = {
-      WebSocketURI: (process.env.REACT_APP_AUTHSERVER).replace("{shard}", randomshard) + localStorage.getItem("instance_slug"),
+      WebSocketURI: wsuri,
       ConfigLoaded: false,
       Shard: randomshard,
       isDev: (process.env.NODE_ENV === "development"),
@@ -45,6 +55,7 @@ class App extends React.Component {
       posLoading: true,
       productsLoading: true,
       pmLoading: true,
+      Status: {},
       overlayState: "overlay overlay-show",
       overlayText: "Verbindung wird hergestellt...",
       paymentmethods: [],
@@ -53,6 +64,12 @@ class App extends React.Component {
       RefreshButtonText: "Kasse updaten",
       RefreshButtonColor: "btn-primary",
       WorkplaceData: null,
+      licenseLoading: true,
+      statusLoading: true,
+      statusAlert: "",
+      configLoading: true,
+      deviceRegistering: true,
+      workplaceText: "Arbeitsplätze werden geladen..."
     }
 
     this.changePage = this.changePage.bind(this);
@@ -66,6 +83,8 @@ class App extends React.Component {
     this.refreshLicense = this.refreshLicense.bind(this);
     this.refreshConfig = this.refreshConfig.bind(this);
     this.registerDevice = this.registerDevice.bind(this);
+    this.refreshStatus = this.refreshStatus.bind(this);
+    this.refreshAll = this.refreshAll.bind(this);
 
     if (localStorage.getItem("identifier") === null) {
       localStorage.setItem("identifier", uuid.v4());
@@ -93,10 +112,15 @@ class App extends React.Component {
       overlayState: "",
       overlayText: ""
     });
+    this.refreshAll();
+  }
+
+  refreshAll() {
     this.refreshPOS();
     this.refreshLicense();
     this.refreshConfig();
     this.registerDevice();
+    this.refreshStatus();
   }
 
   onWSDisconnect() {
@@ -126,6 +150,9 @@ class App extends React.Component {
 
 
   registerDevice(workplace = false) {
+    this.setState({
+      deviceRegistering: true
+    });
     if (!workplace) {
       this.refWebSocket.sendMessage(JSON.stringify({
         "command": "registerdevice",
@@ -146,7 +173,24 @@ class App extends React.Component {
     }));
   }
 
+
+  refreshStatus() {
+    this.setState({
+      statusLoading: true
+    });
+    this.refWebSocket.sendMessage(JSON.stringify({
+      "command": "getstatus",
+      "parameters": {
+        "api_key": localStorage.getItem("api_key"),
+      }
+    }));
+  }
+
+
   refreshConfig() {
+    this.setState({
+      posLoading: true
+    });
     this.refWebSocket.sendMessage(JSON.stringify({
       "command": "getconfig",
       "parameters": {
@@ -156,6 +200,9 @@ class App extends React.Component {
   }
 
   refreshLicense() {
+    this.setState({
+      licenseLoading: false
+    });
     this.refWebSocket.sendMessage(JSON.stringify({
       "command": "getlicense",
       "parameters": {
@@ -178,7 +225,8 @@ class App extends React.Component {
       if (WSData.result.event === "listpos") {
         this.setState({
           workplaces: WSData.result.parameters.POS,
-          posLoading: false
+          posLoading: false,
+          workplaceText: "Arbeitsplatz auswählen"
         });
       }
       if (WSData.result.event === "listpm") {
@@ -188,15 +236,40 @@ class App extends React.Component {
         });
       }
 
+      if (WSData.result.event === "getstatus") {
+        this.setState({
+          Status: WSData.result.parameters,
+          statusLoading: false
+        });
+
+        let classnameAO = "alert alert-" + WSData.result.parameters.status;
+        this.setState({
+          statusAlertAO: <div className={classnameAO}>{WSData.result.parameters.message}! <a href="https://status.pixelcatproductions.net">Check our Status Page</a> for more information.</div>
+        });
+
+        if (WSData.result.parameters.status !== "success") {
+          let classname = "alert alert-" + WSData.result.parameters.status;
+          this.setState({
+            statusAlert: <div className={classname}>{WSData.result.parameters.message}! <a href="https://status.pixelcatproductions.net">Check our Status Page</a> for more information.</div>
+          });
+        } else {
+          this.setState({
+            statusAlert: ""
+          });
+        }
+      }
+
       if (WSData.result.event === "getconfig") {
         this.setState({
           Config: WSData.result.parameters.Config,
+          configLoading: false
         });
 
       }
       if (WSData.result.event === "getlicense") {
         this.setState({
           License: WSData.result.parameters.License,
+          licenseLoading: false
         });
 
 
@@ -224,15 +297,15 @@ class App extends React.Component {
       }
 
     }
-    
-	if(WSData.type === "broadcast"){
-	  if (WSData.result.message === "updatepos") {
+
+    if (WSData.type === "broadcast") {
+      if (WSData.result.message === "updatepos") {
         this.setState({
           RefreshButtonText: "Kasse updaten (Update ausstehend!)",
           RefreshButtonColor: "btn-danger btn-block",
         });
       }
-	}
+    }
 
     if (WSData.type === "error") {
       if (WSData.result.error === "missing_parameter_api") {
@@ -372,6 +445,8 @@ class App extends React.Component {
       posLoading: true,
       RefreshButtonText: "Kasse updaten",
       RefreshButtonColor: "btn-primary",
+
+      workplaceText: "Arbeitsplätze werden geladen..."
     });
 
     this.refWebSocket.sendMessage(JSON.stringify({
@@ -394,25 +469,42 @@ class App extends React.Component {
           changePage={this.changePage}
           workplaces={this.state.workplaces}
           refreshPOS={this.refreshPOS}
+          refreshAll={this.refreshAll}
+
+          workplaceText={this.state.workplaceText}
+          productsLoading={this.state.productsLoading}
+          pmLoading={this.state.pmLoading}
+          deviceRegistering={this.state.deviceRegistering}
+          configLoading={this.state.configLoading}
+          licenseLoading={this.state.licenseLoading}
+          posLoading={this.state.posLoading}
         />;
         break;
       case 'viewpos':
         page = <ViewPOS
           refreshPM={this.refreshPM}
           refreshProducts={this.refreshProducts}
-          productsLoading={this.state.productsLoading}
-          WorkplaceData={this.state.WorkplaceData}
-          pmLoading={this.state.pmLoading}
+          onWSMessage={this.handleWS}
           changeQuantity={this.changeQuantity}
           registerDevice={this.registerDevice}
-          DepositPrice={this.state.depositprice}
-          onWSMessage={this.handleWS}
-          products={this.state.products}
-          productsStatic={this.state.productsStatic}
-          paymentmethods={this.state.paymentmethods}
           setProducts={this.setProducts}
           setPM={this.setPM}
           changePage={this.changePage}
+
+
+          products={this.state.products}
+          productsStatic={this.state.productsStatic}
+          paymentmethods={this.state.paymentmethods}
+
+          productsLoading={this.state.productsLoading}
+          pmLoading={this.state.pmLoading}
+          deviceRegistering={this.state.deviceRegistering}
+          configLoading={this.state.configLoading}
+          licenseLoading={this.state.licenseLoading}
+          posLoading={this.state.posLoading}
+
+          WorkplaceData={this.state.WorkplaceData}
+          DepositPrice={this.state.depositprice}
           WebSocket={this.refWebSocket}
           workplaceid={this.state.workplaceid}
           RefreshButtonText={this.state.RefreshButtonText}
@@ -436,8 +528,9 @@ class App extends React.Component {
         page = <License
           License={this.state.License}
           Config={this.state.Config}
-          refreshConfig={this.refreshConfig}
-          refreshLicense={this.refreshLicense}
+          Status={this.state.Status}
+          statusAlertAO={this.state.statusAlertAO}
+          refreshAll={this.refreshAll}
           WebSocketURI={this.state.WebSocketURI}
           Shard={this.state.Shard}
           LicenseNoBackButton={this.state.LicenseNoBackButton}
@@ -489,6 +582,7 @@ class App extends React.Component {
     return (
       <div id="app-container">
         <Header />
+        {this.state.statusAlert}
         {page}
         {overlay}
 

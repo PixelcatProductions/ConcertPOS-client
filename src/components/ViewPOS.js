@@ -4,6 +4,7 @@ import Noty from 'noty';
 import PriceCalculator from './PriceCalculator';
 import PaymentMethodButton from './PaymentMethodButton';
 import Parser from 'html-react-parser';
+import Card from './Card';
 //import Websocket from 'react-websocket';
 
 class ViewPOS extends React.Component {
@@ -150,17 +151,37 @@ class ViewPOS extends React.Component {
 
         if (this.props.WorkplaceData.admin || this.props.WorkplaceData.special) {
             return (
-                <div className="text-center">
-                    <h1>Dieses Interface kann nicht über den Client aufgerufen werden!</h1>
-                </div>
+                <Card
+                    Header="Bitte warten..."
+                    Body={<h2 className="text-center">Dieses Interface kann nicht über den Client aufgerufen werden!</h2>}
+                    ShowButton={true}
+                    ButtonUrl="selectworkplace"
+                    ButtonText="Zurück"
+                    changePage={this.props.changePage}
+                />
+            );
+        }
+
+        if (this.props.productsLoading) {
+            return (
+                <Card
+                    Header="Bitte warten..."
+                    Body={<h2 className="text-center">Produkte werden geladen...</h2>}
+                    ShowButton={false}
+                />
             );
         }
 
         if (Object.keys(this.props.products).length === 0) {
             return (
-                <div className="text-center">
-                    <h1>Es sind keine Produkte verfügbar! <button className="btn btn-primary" onClick={this.props.refreshProducts}>Neuladen</button></h1>
-                </div>
+                <Card
+                    Header="Ups!"
+                    Body={<h2 className="text-center">Es sind keine Produkte verfügbar! <button className="btn btn-primary" onClick={this.props.refreshProducts}>Neuladen</button></h2>}
+                    ShowButton={true}
+                    ButtonUrl="selectworkplace"
+                    ButtonText="Zurück"
+                    changePage={this.props.changePage}
+                />
             );
         }
 
@@ -192,6 +213,27 @@ class ViewPOS extends React.Component {
             );
         }
 
+
+        let pm = <div className="row">
+            {this.props.paymentmethods.map(paymentmethod => {
+                return (
+                    <PaymentMethodButton
+                        POS={this.props.WorkplaceData}
+                        productQueue={this.state.productQueue}
+                        payItems={this.payItems}
+                        PaymentMethod={paymentmethod} />
+                )
+            })}
+        </div>;
+
+        if (Object.keys(this.props.paymentmethods).length === 0) {
+            pm = <Card
+                Header=""
+                Body={<h2 className="text-center">Es wurden keine Bezahlungsmethoden zugewiesen!</h2>}
+                ShowButton={false}
+            />
+        }
+
         return (
             <div className="container">
 
@@ -209,17 +251,7 @@ class ViewPOS extends React.Component {
                     leavePOS={this.leavePOS}
                     refreshProducts={this.props.refreshProducts} />
 
-                <div className="row">
-                    {this.props.paymentmethods.map(paymentmethod => {
-                        return (
-                            <PaymentMethodButton
-                                POS={this.props.WorkplaceData}
-                                productQueue={this.state.productQueue}
-                                payItems={this.payItems}
-                                PaymentMethod={paymentmethod} />
-                        )
-                    })}
-                </div>
+                {pm}
             </div>
         );
     }

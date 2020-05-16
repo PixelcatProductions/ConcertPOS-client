@@ -7,8 +7,11 @@ class SelectWorkplace extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = { "workplace": "none" };
+        this.state = {
+            workplace: "none",
+        };
         this.handleChange = this.handleChange.bind(this);
+        
     }
 
 
@@ -36,6 +39,7 @@ class SelectWorkplace extends React.Component {
     }
 
     render() {
+
         return (
             <div className="container h-100">
                 <div id="workplace">
@@ -48,8 +52,8 @@ class SelectWorkplace extends React.Component {
                                     </div>
 
                                     <div className="form-group">
-                                        <select className="form-control" value={this.state.workplace} onChange={this.handleChange}>
-                                            <option key="none" value="none" disabled>Wähle deinen Arbeitsplatz aus</option>
+                                        <select className="form-control" value={this.state.workplace} onChange={this.handleChange} disabled={this.props.posLoading}>
+                                            <option key="none" value="none" disabled>{this.props.workplaceText}</option>
                                             {this.props.workplaces.map(workplace => {
                                                 if (!workplace.enabled) return null;
                                                 if (workplace.special) return null;
@@ -63,8 +67,8 @@ class SelectWorkplace extends React.Component {
                                     </div>
                                     <div className="btn-group d-flex">
                                         <button className="btn btn-warning w-100" onClick={() => this.props.changePage("setup", {})}>Einstellungen</button>
-                                        <button className="btn btn-primary w-100" onClick={this.props.refreshPOS}>Aktualisieren</button>
-                                        <button className="btn btn-info w-100" onClick={() => this.props.changePage("info", {})}>Informationen</button>
+                                        <button className="btn btn-primary w-100" onClick={this.props.refreshAll} disabled={this.props.posLoading}>Aktualisieren</button>
+                                        <button className="btn btn-info w-100" onClick={() => this.props.changePage("info", {})} disabled={this.props.licenseLoading || this.props.configLoading}>Informationen</button>
                                     </div>
                                 </div>
                             </div>
