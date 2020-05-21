@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 //import 'bootstrap/dist/css/bootstrap.min.css';
 import App from './App';
 import Noty from 'noty';
+import './i18n';
 
 new Noty({
   text: "Loaded ConcertPOS!",

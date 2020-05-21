@@ -90,6 +90,7 @@ class ViewPOS extends React.Component {
                 "Products": this.props.products,
                 "PaymentMethod": PaymentMethod,
                 "POSID": POS,
+                "posPassword": this.props.posPassword
             }
         }));
 

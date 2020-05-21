@@ -11,7 +11,7 @@ class SelectWorkplace extends React.Component {
             workplace: "none",
         };
         this.handleChange = this.handleChange.bind(this);
-        
+
     }
 
 
@@ -33,9 +33,10 @@ class SelectWorkplace extends React.Component {
                 timeout: 5000,
                 type: "warning"
             }).show();
+            this.props.changePage("auth", { ID: event.target.value, Data: WorkplaceFiltered, posPassword: null });
             return;
         }
-        this.props.changePage("viewpos", { ID: event.target.value, Data: WorkplaceFiltered });
+        this.props.changePage("viewpos", { ID: event.target.value, Data: WorkplaceFiltered, posPassword: null });
     }
 
     render() {

@@ -11,6 +11,7 @@ import Card from './components/Card';
 import License from './components/License';
 import * as uuid from 'uuid';
 import { translate, Trans } from 'react-i18next';
+import Auth from './components/Auth';
 
 class App extends React.Component {
 
@@ -23,21 +24,16 @@ class App extends React.Component {
 
     let randomshard = Shards[Math.floor(Math.random() * Shards.length)];
 
-    if (process.env.NODE_ENV === "development") {
-      randomshard = process.env.REACT_APP_DEVSHARD;
-    }
+    let authserver = (process.env.REACT_APP_AUTHSERVER);
+    authserver = authserver.replace("{shard}", randomshard);
+    authserver = authserver.replace("{environment}", process.env.NODE_ENV);
+    authserver = authserver.replace("{instance}", localStorage.getItem("instance_slug"));
 
 
-    let wsuri = (process.env.REACT_APP_AUTHSERVER).replace("{shard}", randomshard) + localStorage.getItem("instance_slug");
-    /*if (process.env.NODE_ENV === "development") {
-      wsuri = "ws://localhost:6001/" + localStorage.getItem("instance_slug");
-    }*/
-
-    console.log(wsuri);
 
 
     this.state = {
-      WebSocketURI: wsuri,
+      WebSocketURI: authserver,
       ConfigLoaded: false,
       Shard: randomshard,
       isDev: (process.env.NODE_ENV === "development"),
@@ -46,6 +42,7 @@ class App extends React.Component {
       previousWorkspace: {},
       workplaceid: 0,
       License: {},
+      posPassword: null,
       products: [],
       ErrorButtonUrl: "selectworkspace",
       ErrorButtonText: "Zürück",
@@ -296,6 +293,32 @@ class App extends React.Component {
         }).show();
       }
 
+
+      if (WSData.result.event === "verifyauth") {
+        if (WSData.result.parameters.success) {
+          new Noty({
+            text: `Login erfolgreich!`,
+            type: "success",
+            timeout: 1000,
+            theme: "bootstrap-v4",
+          }).show();
+          this.setState({
+            posPassword: WSData.result.parameters.password
+          });
+          this.changePage("viewpos", { ID: this.state.workplaceid, Data: this.state.WorkplaceData, posPassword: WSData.result.parameters.password })
+        } else {
+          this.setState({
+            posPassword: null
+          });
+          new Noty({
+            text: `Das Passwort ist ungültig!`,
+            type: "error",
+            timeout: 1000,
+            theme: "bootstrap-v4",
+          }).show();
+        }
+      }
+
     }
 
     if (WSData.type === "broadcast") {
@@ -308,6 +331,16 @@ class App extends React.Component {
     }
 
     if (WSData.type === "error") {
+      if (WSData.result.error === "invalid_password") {
+        this.setState({
+          ErrorHeader: "Ein Fehler ist aufgetreten!",
+          ErrorBody: "Das Passwort dieses Arbeitsbereiches ist ungültig, vielleicht wurde es geändert?",
+          ErrorButtonShow: true,
+          ErrorButtonUrl: "selectworkplace",
+          ErrorButtonText: "Hauptmenü"
+        });
+        this.changePage("error", {});
+      }
       if (WSData.result.error === "missing_parameter_api") {
         this.setState({
           ErrorHeader: "Ein Fehler ist aufgetreten!",
@@ -370,7 +403,7 @@ class App extends React.Component {
     }
 
     if (Workplace === undefined || Workplace === null) {
-      Workplace = { ID: 0, Data: {} };
+      Workplace = { ID: 0, Data: {}, posPassword: null };
     }
 
     this.setState({
@@ -404,7 +437,8 @@ class App extends React.Component {
       "command": "listpm",
       "parameters": {
         "api_key": localStorage.getItem("api_key"),
-        "POSID": this.state.workplaceid
+        "POSID": this.state.workplaceid,
+        "posPassword": this.state.posPassword
       }
     }));
   }
@@ -432,7 +466,8 @@ class App extends React.Component {
       "command": "listproducts",
       "parameters": {
         "api_key": localStorage.getItem("api_key"),
-        "POSID": this.state.workplaceid
+        "POSID": this.state.workplaceid,
+        "posPassword": this.state.posPassword
       }
     }));
   }
@@ -490,6 +525,7 @@ class App extends React.Component {
           setProducts={this.setProducts}
           setPM={this.setPM}
           changePage={this.changePage}
+          posPassword={this.state.posPassword}
 
 
           products={this.state.products}
@@ -538,6 +574,14 @@ class App extends React.Component {
         />
         break;
 
+      case 'auth':
+        page = <Auth
+          changePage={this.changePage}
+          refWebSocket={this.refWebSocket}
+          workplaceid={this.state.workplaceid}
+
+        />
+        break;
       case 'setup':
         page = <Setup
           changePage={this.changePage}
