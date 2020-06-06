@@ -29,6 +29,10 @@ class App extends React.Component {
     authserver = authserver.replace("{environment}", process.env.NODE_ENV);
     authserver = authserver.replace("{instance}", localStorage.getItem("instance_slug"));
 
+    if (process.env.REACT_APP_USE_LOCALHOST) {
+      authserver = "ws://localhost:6001/" + localStorage.getItem("instance_slug");
+    }
+
 
 
 
@@ -359,10 +363,26 @@ class App extends React.Component {
         });
         this.changePage("error", {});
       }
+      if (WSData.result.error === "ratelimit") {
+        new Noty({
+          text: `Befehl ${WSData.result.code.command} wurde zu oft Benutzt versuche es in ${WSData.result.code.retry_after / 1000} Sekunden noch einmal!`,
+          type: "error",
+          timeout: 1000,
+          theme: "bootstrap-v4",
+        }).show();
+      }
       if (WSData.result.error === "no_api_key") {
         this.setState({
           ErrorHeader: "Ein Fehler ist aufgetreten!",
           ErrorBody: "Websocket Fehler (no_api_key), deine ConcertPOS Instanz hat keinen API Key gesetzt, bitte lege einen in der Verwaltung an  :(! Ich kann leider nicht weiterarbeiten da ich nicht mit der API kommunizieren kann :(",
+          ErrorButtonShow: false
+        });
+        this.changePage("error", {});
+      }
+      if (WSData.result.error === "getlicense") {
+        this.setState({
+          ErrorHeader: "Ein Fehler ist aufgetreten!",
+          ErrorBody: "Websocket Fehler (getlicense), deine ConcertPOS Instanz hat eine ungültige Lizenz, bitte überprüfe den Lizenzschlüssel in der Verwaltung! Ich kann leider nicht weiterarbeiten da ich nicht mit der API kommunizieren kann :(",
           ErrorButtonShow: false
         });
         this.changePage("error", {});
