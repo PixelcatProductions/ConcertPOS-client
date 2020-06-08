@@ -12,6 +12,7 @@ import License from './components/License';
 import * as uuid from 'uuid';
 import { translate, Trans } from 'react-i18next';
 import Auth from './components/Auth';
+import * as JSON5 from 'json5';
 
 class App extends React.Component {
 
@@ -25,15 +26,14 @@ class App extends React.Component {
     let randomshard = Shards[Math.floor(Math.random() * Shards.length)];
 
     let authserver = (process.env.REACT_APP_AUTHSERVER);
+
+    if (process.env.REACT_APP_USE_LOCALHOST && process.env.NODE_ENV === "development") {
+      authserver = process.env.REACT_APP_LOCALHOSTSERVER;
+    }
+
     authserver = authserver.replace("{shard}", randomshard);
     authserver = authserver.replace("{environment}", process.env.NODE_ENV);
     authserver = authserver.replace("{instance}", localStorage.getItem("instance_slug"));
-
-    if (process.env.REACT_APP_USE_LOCALHOST) {
-      authserver = "ws://localhost:6001/" + localStorage.getItem("instance_slug");
-    }
-
-
 
 
     this.state = {
@@ -155,7 +155,7 @@ class App extends React.Component {
       deviceRegistering: true
     });
     if (!workplace) {
-      this.refWebSocket.sendMessage(JSON.stringify({
+      this.refWebSocket.sendMessage(JSON5.stringify({
         "command": "registerdevice",
         "parameters": {
           "api_key": localStorage.getItem("api_key"),
@@ -164,7 +164,7 @@ class App extends React.Component {
       }));
       return;
     }
-    this.refWebSocket.sendMessage(JSON.stringify({
+    this.refWebSocket.sendMessage(JSON5.stringify({
       "command": "registerdevice",
       "parameters": {
         "api_key": localStorage.getItem("api_key"),
@@ -179,7 +179,7 @@ class App extends React.Component {
     this.setState({
       statusLoading: true
     });
-    this.refWebSocket.sendMessage(JSON.stringify({
+    this.refWebSocket.sendMessage(JSON5.stringify({
       "command": "getstatus",
       "parameters": {
         "api_key": localStorage.getItem("api_key"),
@@ -192,7 +192,7 @@ class App extends React.Component {
     this.setState({
       posLoading: true
     });
-    this.refWebSocket.sendMessage(JSON.stringify({
+    this.refWebSocket.sendMessage(JSON5.stringify({
       "command": "getconfig",
       "parameters": {
         "api_key": localStorage.getItem("api_key"),
@@ -204,7 +204,7 @@ class App extends React.Component {
     this.setState({
       licenseLoading: false
     });
-    this.refWebSocket.sendMessage(JSON.stringify({
+    this.refWebSocket.sendMessage(JSON5.stringify({
       "command": "getlicense",
       "parameters": {
         "api_key": localStorage.getItem("api_key"),
@@ -213,7 +213,7 @@ class App extends React.Component {
   }
 
   handleWS(data) {
-    var WSData = JSON.parse(data);
+    var WSData = JSON5.parse(data);
 
     if (WSData.type === "event") {
       if (WSData.result.event === "listproducts") {
@@ -345,6 +345,14 @@ class App extends React.Component {
         });
         this.changePage("error", {});
       }
+      if (WSData.result.error === "invalid_json" || WSData.result.error === "invalid_json5") {
+        this.setState({
+          ErrorHeader: "Ein Fehler ist aufgetreten!",
+          ErrorBody: "Websocket Fehler ("+WSData.result.error+"), hier ist ein Programmierfehler :(! Ich kann leider nicht weiterarbeiten da ich nicht mit der API kommunizieren kann :(",
+          ErrorButtonShow: false
+        });
+        this.changePage("error", {});
+      }
       if (WSData.result.error === "missing_parameter_api") {
         this.setState({
           ErrorHeader: "Ein Fehler ist aufgetreten!",
@@ -453,7 +461,7 @@ class App extends React.Component {
       RefreshButtonColor: "btn-primary",
     });
 
-    this.refWebSocket.sendMessage(JSON.stringify({
+    this.refWebSocket.sendMessage(JSON5.stringify({
       "command": "listpm",
       "parameters": {
         "api_key": localStorage.getItem("api_key"),
@@ -482,7 +490,7 @@ class App extends React.Component {
       RefreshButtonColor: "btn-primary",
     });
 
-    this.refWebSocket.sendMessage(JSON.stringify({
+    this.refWebSocket.sendMessage(JSON5.stringify({
       "command": "listproducts",
       "parameters": {
         "api_key": localStorage.getItem("api_key"),
@@ -504,7 +512,7 @@ class App extends React.Component {
       workplaceText: "Arbeitsplätze werden geladen..."
     });
 
-    this.refWebSocket.sendMessage(JSON.stringify({
+    this.refWebSocket.sendMessage(JSON5.stringify({
       "command": "listpos",
       "parameters": {
         "api_key": localStorage.getItem("api_key")

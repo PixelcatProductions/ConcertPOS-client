@@ -1,4 +1,5 @@
 import React from 'react';
+import * as JSON5 from 'json5';
 //import Websocket from 'react-websocket';
 
 class Auth extends React.Component {
@@ -14,7 +15,7 @@ class Auth extends React.Component {
 
     verifyPassword() {
 
-        this.props.refWebSocket.sendMessage(JSON.stringify({
+        this.props.refWebSocket.sendMessage(JSON5.stringify({
             "command": "verifyauth",
             "parameters": {
                 "api_key": localStorage.getItem("api_key"),

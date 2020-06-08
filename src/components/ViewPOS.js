@@ -5,6 +5,7 @@ import PriceCalculator from './PriceCalculator';
 import PaymentMethodButton from './PaymentMethodButton';
 import Parser from 'html-react-parser';
 import Card from './Card';
+import * as JSON5 from 'json5';
 //import Websocket from 'react-websocket';
 
 class ViewPOS extends React.Component {
@@ -23,7 +24,7 @@ class ViewPOS extends React.Component {
         this.props.refreshPM();
 
 
-        this.props.WebSocket.sendMessage(JSON.stringify({
+        this.props.WebSocket.sendMessage(JSON5.stringify({
             "command": "getdeposit",
             "parameters": {
                 "api_key": localStorage.getItem("api_key"),
@@ -83,7 +84,7 @@ class ViewPOS extends React.Component {
     payItems(Items, PaymentMethod, POS) {
 
 
-        this.props.WebSocket.sendMessage(JSON.stringify({
+        this.props.WebSocket.sendMessage(JSON5.stringify({
             "command": "payitems",
             "parameters": {
                 "api_key": localStorage.getItem("api_key"),
